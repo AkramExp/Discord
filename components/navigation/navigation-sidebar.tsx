@@ -7,11 +7,12 @@ import { ScrollArea } from "../ui/scroll-area";
 import { Separator } from "../ui/separator";
 import NavigationAction from "./navigation-action";
 import NavigationItem from "./navigation-item";
+import { auth } from "@clerk/nextjs/server";
 
 const NavigationSidebar = async () => {
   const profile = await currentProfile();
 
-  if (!profile) return redirect("/");
+  if (!profile) return auth().redirectToSignIn();
 
   const servers = await db.server.findMany({
     where: {

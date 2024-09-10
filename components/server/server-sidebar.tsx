@@ -3,11 +3,12 @@ import { db } from "@/lib/db";
 import { ChannelType } from "@prisma/client";
 import { redirect } from "next/navigation";
 import ServerHeader from "./server-header";
+import { auth } from "@clerk/nextjs/server";
 
 const ServerSidebar = async ({ serverId }: { serverId: string }) => {
   const profile = await currentProfile();
 
-  if (!profile) return redirect("/");
+  if (!profile) return auth().redirectToSignIn();
 
   const server = await db.server.findUnique({
     where: {
