@@ -8,38 +8,22 @@ export async function PATCH(
 ) {
   try {
     const profile = await currentProfile();
-    const { name, imageUrl } = await req.json();
 
     if (!profile) return new NextResponse("Unauthorized", { status: 401 });
 
     const server = await db.server.update({
       where: {
         id: params.serverId,
-        profileId: profile.id,
+        profileId: {
+          not: profile.id,
+        },
       },
-      data: { name, imageUrl },
-    });
-
-    return NextResponse.json(server);
-  } catch (error) {
-    console.log(error);
-    return new NextResponse("Internal Error", { status: 500 });
-  }
-}
-
-export async function DELETE(
-  req: Request,
-  { params }: { params: { serverId: string } }
-) {
-  try {
-    const profile = await currentProfile();
-
-    if (!profile) return new NextResponse("Unauthorized", { status: 401 });
-
-    const server = await db.server.deleteMany({
-      where: {
-        id: params.serverId,
-        profileId: profile.id,
+      data: {
+        members: {
+          deleteMany: {
+            profileId: profile.id,
+          },
+        },
       },
     });
 
