@@ -123,7 +123,6 @@ model Conversation {
 
   directMessages DirectMessage[]
 
-  @@unique([memberOneId,memberTwoId])
 }
 
 model DirectMessage {

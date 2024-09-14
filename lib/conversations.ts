@@ -50,7 +50,9 @@ const createConversation = async (memberOneId: string, memberTwoId: string) => {
       },
       include: {
         memberOne: {
-          include: { profile: true },
+          include: {
+            profile: true,
+          },
         },
         memberTwo: {
           include: {
@@ -60,6 +62,8 @@ const createConversation = async (memberOneId: string, memberTwoId: string) => {
       },
     });
   } catch (error) {
+    console.log(error);
+
     return null;
   }
 };
