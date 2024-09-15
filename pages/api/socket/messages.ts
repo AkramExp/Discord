@@ -3,7 +3,7 @@ import { db } from "@/lib/db";
 import { NextApiServerResponseIo } from "@/types";
 import { NextApiRequest } from "next";
 
-export async function handler(
+export default async function handler(
   req: NextApiRequest,
   res: NextApiServerResponseIo
 ) {
@@ -58,7 +58,7 @@ export async function handler(
 
     if (!member) return res.status(400).json({ error: "Member not found" });
 
-    const message = db.message.create({
+    const message = await db.message.create({
       data: {
         fileUrl,
         content,
@@ -77,6 +77,8 @@ export async function handler(
     const channelKey = `chat:${channelId}:messages`;
 
     res?.socket?.server?.io.emit(channelKey, message);
+
+    return res.status(200).json(message);
   } catch (error) {
     return res.status(500).json({ error: "Internal Error" });
   }
