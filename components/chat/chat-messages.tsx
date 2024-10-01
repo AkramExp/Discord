@@ -44,6 +44,8 @@ const ChatMessages = ({
     paramValue,
   });
 
+  console.log(data);
+
   // @ts-ignore
   if (status === "loading") {
     return (
@@ -75,7 +77,7 @@ const ChatMessages = ({
           {data?.pages?.map((group, i) => (
             <Fragment key={i}>
               {group.items.map((message: MessageWithMemberWithProfile) => {
-                <div key={message.id}>{message.content}</div>;
+                return <div key={message.id}>{message.content}</div>;
               })}
             </Fragment>
           ))}

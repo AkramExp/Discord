@@ -8,12 +8,15 @@ const MESSAGES_BATCH = 10;
 export async function GET(req: Request) {
   try {
     const profile = await currentProfile();
+
     const { searchParams } = new URL(req.url);
 
     if (!profile) return new NextResponse("Unauthorized", { status: 401 });
 
     const cursor = searchParams.get("cursor");
     const channelId = searchParams.get("channelId");
+
+    console.log(cursor);
 
     if (!channelId)
       return new NextResponse("Channel Id missing", { status: 400 });
