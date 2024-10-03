@@ -6,13 +6,15 @@ import { Member, MemberRole, Profile } from "@prisma/client";
 import { Edit, FileIcon, ShieldAlert, ShieldCheck, Trash } from "lucide-react";
 import Image from "next/image";
 import { useEffect, useState } from "react";
-import { Form, useForm } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import * as z from "zod";
 import ActionTooltip from "../navigation/action-tooltip";
 import { Button } from "../ui/button";
-import { FormControl, FormField, FormItem } from "../ui/form";
+import { Form, FormControl, FormField, FormItem } from "../ui/form";
 import { Input } from "../ui/input";
 import UserAvatar from "../user-avatar";
+import qs from "query-string";
+import axios from "axios";
 
 interface ChatItemProps {
   id: string;
@@ -52,6 +54,18 @@ const ChatItem = ({
   const [isEditing, setIsEditing] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
 
+  useEffect(() => {
+    const handleKeyDown = (event: any) => {
+      if (event.key === "Escape" || event.code === 27) {
+        setIsEditing(false);
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, []);
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -73,8 +87,22 @@ const ChatItem = ({
   const isPDF = fileType === "pdf" && fileUrl;
   const isImage = !isPDF && fileUrl;
 
-  function onSubmit(values) {
-    console.log(values);
+  const isLoading = form.formState.isSubmitting;
+
+  async function onSubmit(values: z.infer<typeof formSchema>) {
+    try {
+      const url = qs.stringifyUrl({
+        url: `${socketUrl}/${id}`,
+        query: socketQuery,
+      });
+
+      await axios.patch(url, values);
+
+      form.reset();
+      setIsEditing(false);
+    } catch (error) {
+      console.log(error);
+    }
   }
 
   return (
@@ -150,23 +178,22 @@ const ChatItem = ({
                 <FormField
                   control={form.control}
                   name="content"
-                  render={({ field }) => {
-                    return (
-                      <FormItem className="flex-1">
-                        <FormControl>
-                          <div className="relative w-full">
-                            <Input
-                              className="p-2 bg-zinc-200/90 dark:bg-zinc-700/75 border-none border-0 focus-visible:ring-0 focus-visible:ring-offset-0 text-zinc-600 dark:text-zinc-200"
-                              placeholder="Edited message"
-                              {...field}
-                            />
-                          </div>
-                        </FormControl>
-                      </FormItem>
-                    );
-                  }}
+                  render={({ field }) => (
+                    <FormItem className="flex-1">
+                      <FormControl>
+                        <div className="relative w-full">
+                          <Input
+                            disabled={isLoading}
+                            className="p-2 bg-zinc-200/90 dark:bg-zinc-700/75 border-none border-0 focus-visible:ring-0 focus-visible:ring-offset-0 text-zinc-600 dark:text-zinc-200"
+                            placeholder="Edited message"
+                            {...field}
+                          />
+                        </div>
+                      </FormControl>
+                    </FormItem>
+                  )}
                 />
-                <Button className="sm" variant="primary">
+                <Button disabled={isLoading} className="sm" variant="primary">
                   Save
                 </Button>
               </form>
